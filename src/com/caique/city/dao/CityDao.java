@@ -25,7 +25,7 @@ public class CityDao {
 				Long id = rs.getLong("id");
 				String name = rs.getString("name");
 				Double latitude = rs.getDouble("latitude");
-				Double longitude = rs.getDouble("id");
+				Double longitude = rs.getDouble("longitude");
 				cities.add(new City(id, name, latitude, longitude));
 			}
 			

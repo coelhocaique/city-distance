@@ -3,8 +3,6 @@ package com.caique.city.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import com.caique.city.dao.CityDao;
 import com.caique.city.dto.CityDistanceDTO;
 import com.caique.city.model.City;
@@ -13,8 +11,11 @@ import com.caique.city.service.CityDistanceService;
 
 public class CityDistanceServiceImpl implements CityDistanceService {
 	
-	@Inject
 	private CityDao cityDao;
+	
+	public CityDistanceServiceImpl() {
+		cityDao = new CityDao();
+	}
 	
 	@Override
 	public List<CityDistanceDTO> calculateWithAllCities(String measureUnit) throws Exception {
@@ -32,8 +33,7 @@ public class CityDistanceServiceImpl implements CityDistanceService {
 						City dest = cities.get(j);
 						Double lat2 = dest.getLatitude();
 						Double long2 = dest.getLongitude();
-						Double distance = calculateDistance(lat1,lat2,long1,long2);
-						distance = convertDistance(distance,measureUnit);
+						Double distance = calculateDistance(lat1,lat2,long1,long2,measureUnit);
 						cityDistanceDTOs.add(new CityDistanceDTO(src, dest, distance,measureUnit));
 					}
 				}
@@ -45,31 +45,24 @@ public class CityDistanceServiceImpl implements CityDistanceService {
 	}
 	
 	/**
-	 * @param distance
-	 * @param measureUnit
-	 * @return distance converted to meaasureUnit
-	 */
-	private Double convertDistance(Double distance, String measureUnit) {
-		if (measureUnit.equals("km")){
-			return distance * 100000;
-		}else{
-			return distance * 160934;
-		}
-	}
-	
-	
-	/**
 	 * calculate distance between two points in a circle using Haversine method
+	 *  R =  6,371km / 3960miles
+		  Δlat = lat2− lat1
+		  Δlong = long2− long1
+		  a = sin²(Δlat/2) + cos(lat1).cos(lat2).sin²(Δlong/2)
+		  c = 2.atan2(√a, √(1−a))
+		  d = R.c
 	 * @param lat1
 	 * @param lat2
 	 * @param long1
 	 * @param long2
+	 * @param measureUnit 
 	 * @return distance in centimeters
 	 */
-	private Double calculateDistance(Double lat1, Double lat2, Double long1, Double long2) {
+	private Double calculateDistance(Double lat1, Double lat2, Double long1, Double long2, String measureUnit) {
 		
 		//Radius of earth
-		final int radius = 6371;
+		final int radius = measureUnit.equals("km") ? 6371:3960;
 
 	    double latDistance = Math.toRadians(lat2 - lat1);
 	    double lonDistance = Math.toRadians(long2 - long1);
@@ -83,9 +76,7 @@ public class CityDistanceServiceImpl implements CityDistanceService {
 	    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 	    
 	    double distance = radius * c;
-	    
-	    distance = Math.pow(distance, 2);
 
-	    return Math.sqrt(distance);
+	    return distance;
 	}
 }
